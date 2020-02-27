@@ -18,28 +18,32 @@ std::vector<int> indices = { 1, 2, 0 };
 
 std::vector<float> verts = {
 
-	/* 0.0, 0.0, 0.0,  //0 */
-	/* -.6, 0, 0.,		//1 */
-	/* .6, 0, 0.,		//2 */
-	/* 0., -.6, 0.,	//3 */
-	/* 0., .6, 0.,		//4 */
-	/* .6, .6, 0.,		//5 */
+	0.0, 0.0, 0.0,  //0
+	-.6, 0, 0.,		//1
+	.6, 0, 0.,		//2
+	0., -.6, 0.,	//3
+	0., .6, 0.,		//4
+	.6, .6, 0.,		//5
 	
-	.6, -.8, -1.2,
-	0,  .4,  0,
-	-.8, -.2, 1.2
+	/* .6, -.8, -1.2, */
+	/* 0,  .4,  0, */
+	/* -.8, -.2, 1.2 */
 };
 
 
 std::vector<int> inds = {
-	/* 0, 4, 1, */
-	/* 0, 2, 4, */
-	/* 0, 3, 2, */  
-	/* 0, 1, 3, */
-	/* 4, 2, 5 */
-	0, 1, 2
+	0, 4, 1,
+	0, 2, 4,
+	0, 3, 2,  
+	0, 1, 3,
+	4, 2, 5,
+	/* 0, 1, 2 */
 
 };
+
+std::vector<float> cols = {
+	0, 1, 0, 1
+}; 
 
 /* std::vector<float> vertices{ */
 /* 									-0.9,-0.9,0, */
@@ -56,7 +60,7 @@ std::vector<int> inds = {
 /* }; */
 
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices) {
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices, std::vector<float> rgba) {
 
 	unsigned int vertexArray = 0;
 	glGenVertexArrays(1, &vertexArray);
@@ -68,6 +72,11 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> ind
 
 	/* float vertices[] = {1.0, 3.0, 2.0, 5.0, 4.0, 3.0, 2.0, 6.0, 3.0}; */
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCoordinates.size(), vertexCoordinates.data(), GL_STATIC_DRAW); 
+
+	unsigned int rgbaVBO = 0;
+	glGenBuffers(1, &rgbaVBO);
+	glBindBuffer(GL_TEXTURE_BUFFER, rgbaVBO);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
 
 
 	unsigned int index = 0;  // todo: why does this need to be 0?????
@@ -110,9 +119,12 @@ void runProgram(GLFWwindow* window)
     // Set up your scene here (create Vertex Array Objects, etc.)
 	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
-	unsigned int vertexArray = setupVAO(verts, inds);
+	unsigned int vertexArray = setupVAO(verts, inds, cols);
 	
 	shader->activate();
+	auto myUniformLocation = glGetUniformLocation(shader->get(), "myUniform");
+	glad_glUniform4f(myUniformLocation, 0, 1, 0, 1);
+	
 
 
     // Rendering Loop
