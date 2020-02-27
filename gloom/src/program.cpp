@@ -42,7 +42,12 @@ std::vector<int> inds = {
 };
 
 std::vector<float> cols = {
-	0, 1, 0, 1
+	1, 1, 1, 1,
+	0, 1, 0, 1,
+	1, 0, 0, 1,
+	0, 0, 1, 1,
+	1, 1, 0, 1,
+	0, 1, 1, 1, 
 }; 
 
 /* std::vector<float> vertices{ */
@@ -73,15 +78,21 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> ind
 	/* float vertices[] = {1.0, 3.0, 2.0, 5.0, 4.0, 3.0, 2.0, 6.0, 3.0}; */
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCoordinates.size(), vertexCoordinates.data(), GL_STATIC_DRAW); 
 
+	
+	unsigned int index = 0;  // todo: why does this need to be 0?????
+	glEnableVertexAttribArray(index);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArray);
+	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 	unsigned int rgbaVBO = 0;
 	glGenBuffers(1, &rgbaVBO);
-	glBindBuffer(GL_TEXTURE_BUFFER, rgbaVBO);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
 
 
-	unsigned int index = 0;  // todo: why does this need to be 0?????
-	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(index);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	unsigned int indexBuffer = 0;
 	glGenBuffers(1, &indexBuffer);
