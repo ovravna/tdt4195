@@ -2,13 +2,16 @@
 #include "gloom/gloom.hpp"
 #include "program.hpp"
 
+
 // System headers
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 // Standard headers
 #include <cstdlib>
-
+	/* -0.6, -0.6, 0 */
+	/* 0.6, -0.6, 0, */
+	/* 0, 0.6, 0 */
 
 // A callback which allows GLFW to report errors whenever they occur
 static void glfwErrorCallback(int error, const char *description)
@@ -67,15 +70,21 @@ GLFWwindow* initialise()
 }
 
 
+
+
 int main(int argc, char* argb[])
 {
     // Initialise window using GLFW
     GLFWwindow* window = initialise();
 
+
+	/* unsigned int vertexArray = setupVAO(vertices, indices); */
+	/* Gloom::Shader * shader = loadShader(); */
+	/* shader->activate(); */
     // Run an OpenGL application using this window
     runProgram(window);
 
-    // Terminate GLFW (no need to call glfwDestroyWindow)
+    // Terminat, unsigned int vertexArraoe GLFW (no need to call glfwDestroyWindow)
     glfwTerminate();
 
     return EXIT_SUCCESS;
