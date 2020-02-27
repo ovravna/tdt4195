@@ -18,21 +18,26 @@ std::vector<int> indices = { 1, 2, 0 };
 
 std::vector<float> verts = {
 
-	0.0, 0.0, 0.0,  //0
-	-.6, 0, 0.,		//1
-	.6, 0, 0.,		//2
-	0., -.6, 0.,	//3
-	0., .6, 0.,		//4
-	.6, .6, 0.,		//5
+	/* 0.0, 0.0, 0.0,  //0 */
+	/* -.6, 0, 0.,		//1 */
+	/* .6, 0, 0.,		//2 */
+	/* 0., -.6, 0.,	//3 */
+	/* 0., .6, 0.,		//4 */
+	/* .6, .6, 0.,		//5 */
+	
+	.6, -.8, -1.2,
+	0,  .4,  0,
+	-.8, -.2, 1.2
 };
 
 
 std::vector<int> inds = {
-	0, 4, 1,
-	0, 2, 4,
-	0, 3, 2,  
-	0, 1, 3,
-	4, 2, 5
+	/* 0, 4, 1, */
+	/* 0, 2, 4, */
+	/* 0, 3, 2, */  
+	/* 0, 1, 3, */
+	/* 4, 2, 5 */
+	0, 1, 2
 
 };
 
@@ -95,6 +100,7 @@ void runProgram(GLFWwindow* window)
 
     // Configure miscellaneous OpenGL settings
     glEnable(GL_CULL_FACE);
+	/* glFrontFace(GL_CW); */
 
     // Set default colour after clearing the colour buffer
     glClearColor(0.3f, 0.5f, 0.8f, 1.0f);
