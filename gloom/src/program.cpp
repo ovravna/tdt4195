@@ -18,12 +18,16 @@ std::vector<int> indices = { 1, 2, 0 };
 
 std::vector<float> verts = {
 
-	0.0, 0.0, 0.0,  //0
-	-.6, 0, 0.,		//1
-	.6, 0, 0.,		//2
-	0., -.6, 0.,	//3
-	0., .6, 0.,		//4
-	.6, .6, 0.,		//5
+	0.0, 0.1, -0.0,  //0
+	-.2, 0.1, -0.,		//1
+	.6, 0.1, -0.,		//2
+	0.2, -.4, -0.,	//3
+	-.5, 0.2, -0.1,	//1
+	.5, 0.2, -0.1,		//2
+	0., -.3, -0.1,	//3
+	-.6, 0, -0.2,	//1
+	.6, 0, -0.2,		//2
+	0., -.6, -0.2,	//3
 	
 	/* .6, -.8, -1.2, */
 	/* 0,  .4,  0, */
@@ -32,22 +36,29 @@ std::vector<float> verts = {
 
 
 std::vector<int> inds = {
-	0, 4, 1,
-	0, 2, 4,
-	0, 3, 2,  
-	0, 1, 3,
-	4, 2, 5,
-	/* 0, 1, 2 */
+	/* 0, 4, 1, */
+	/* 0, 2, 4, */
+	/* 0, 3, 2, */  
+	/* 0, 1, 3, */
+	/* 4, 2, 5, */
+	1, 3, 2,
+	4, 6, 5,
+	7, 9, 8
+
 
 };
 
 std::vector<float> cols = {
-	1, 1, 1, 1,
-	0, 1, 0, 1,
-	1, 0, 0, 1,
-	0, 0, 1, 1,
-	1, 1, 0, 1,
-	0, 1, 1, 1, 
+	1, 1, 1, 0.5,
+	0, 1, 0, 0.5,
+	0, 1, 0, 0.5,
+	0, 1, 0, 0.5,
+	1, 0, 0, 0.5,
+	1, 0, 0, 0.5, 
+	1, 0, 0, 0.5,
+	0, 0, 1, 0.5,
+	0, 0, 1, 0.5, 
+	0, 0, 1, 0.5,
 }; 
 
 /* std::vector<float> vertices{ */
@@ -119,12 +130,16 @@ void runProgram(GLFWwindow* window)
     glDepthFunc(GL_LESS);
 
     // Configure miscellaneous OpenGL settings
-    glEnable(GL_CULL_FACE);
+    /* glEnable(GL_CULL_FACE); */
+	glDisable(GL_CULL_FACE); 
 	/* glFrontFace(GL_CW); */
 
     // Set default colour after clearing the colour buffer
-    glClearColor(0.3f, 0.5f, 0.8f, 1.0f);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glClearColor(0.3f, 0.5f, 0.8f, 0.7f);
 	auto shader = loadShader();
 
     // Set up your scene here (create Vertex Array Objects, etc.)
@@ -133,8 +148,8 @@ void runProgram(GLFWwindow* window)
 	unsigned int vertexArray = setupVAO(verts, inds, cols);
 	
 	shader->activate();
-	auto myUniformLocation = glGetUniformLocation(shader->get(), "myUniform");
-	glad_glUniform4f(myUniformLocation, 0, 1, 0, 1);
+	/* auto myUniformLocation = glGetUniformLocation(shader->get(), "myUniform"); */
+	/* glad_glUniform4f(myUniformLocation, 0, 1, 0, 1); */
 	
 
 
