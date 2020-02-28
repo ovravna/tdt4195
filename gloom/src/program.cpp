@@ -3,6 +3,7 @@
 #include "gloom/gloom.hpp"
 #include <vector>
 #include "gloom/shader.hpp"
+#include <math.h>
 
 std::vector<float> vertices = { 
 	-0.6, -0.6, 0,
@@ -19,6 +20,7 @@ std::vector<int> indices = { 1, 2, 0 };
 std::vector<float> verts = {
 
 	0.0, 0.1, -0.0,  //0
+
 	-.2, 0.1, -0.,		//1
 	.6, 0.1, -0.,		//2
 	0.2, -.4, -0.,	//3
@@ -50,12 +52,12 @@ std::vector<int> inds = {
 
 std::vector<float> cols = {
 	1, 1, 1, 0.5,
-	0, 1, 0, 0.5,
-	0, 1, 0, 0.5,
-	0, 1, 0, 0.5,
 	1, 0, 0, 0.5,
-	1, 0, 0, 0.5, 
 	1, 0, 0, 0.5,
+	1, 0, 0, 0.5,
+	0, 1, 0, 0.5,
+	0, 1, 0, 0.5, 
+	0, 1, 0, 0.5,
 	0, 0, 1, 0.5,
 	0, 0, 1, 0.5, 
 	0, 0, 1, 0.5,
@@ -139,26 +141,31 @@ void runProgram(GLFWwindow* window)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.3f, 0.5f, 0.8f, 0.7f);
+    glClearColor(1, 1, 1, 1);
 	auto shader = loadShader();
 
     // Set up your scene here (create Vertex Array Objects, etc.)
 	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
 	unsigned int vertexArray = setupVAO(verts, inds, cols);
+
+	
 	
 	shader->activate();
-	/* auto myUniformLocation = glGetUniformLocation(shader->get(), "myUniform"); */
-	/* glad_glUniform4f(myUniformLocation, 0, 1, 0, 1); */
+	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
+	glad_glUniform1f(myUniformLocation, 0);
 	
 
+	float x = 0;
 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
+		x += 0.01;
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glad_glUniform1f(myUniformLocation, sinf(x));
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
 		glBindVertexArray(vertexArray);
