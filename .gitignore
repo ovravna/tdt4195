@@ -1,2 +1,9 @@
 [Bb]uild/*
 !*/.gitkeep
+.clangd/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+gloom/gloom
