@@ -5,6 +5,7 @@
 #include "gloom/shader.hpp"
 #include <math.h>
 
+#include "camera.hpp"
 
 
 std::vector<float> vertices = { 
@@ -151,13 +152,17 @@ void runProgram(GLFWwindow* window)
 	
 	unsigned int vertexArray = setupVAO(cubeVert, cubeInd, cols);
 
+
+	auto cam = new Camera();
 	
 	
 	shader->activate();
 	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
 	auto incrementorLocation = glGetUniformLocation(shader->get(), "incrementor");
+	auto viewMatrixLocation = glGetUniformLocation(shader->get(), "viewMatrix");
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
+	
 	
 
 	float x = 0;
@@ -172,6 +177,7 @@ void runProgram(GLFWwindow* window)
 		glad_glUniform1f(myUniformLocation, 0.5*sinf(x));
 		glad_glUniform1f(incrementorLocation, x);
 
+		glad_glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, cam->getViewMatrix());
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
 		glBindVertexArray(vertexArray);
@@ -180,6 +186,7 @@ void runProgram(GLFWwindow* window)
         // Handle other events
         glfwPollEvents();
         handleKeyboardInput(window);
+		cam->handleKeyboardInput(window);
 
         // Flip buffers
         glfwSwapBuffers(window);
