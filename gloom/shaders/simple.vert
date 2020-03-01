@@ -46,7 +46,15 @@ void main()
 	xRot[1][2] = -sin(incrementor);
 	xRot[2][2] = cos(incrementor);
 
+	// Z-axis rotation
+	mat4x4 zRot = mat4x4(1);
+	zRot[0][0] = cos(incrementor);
+	zRot[1][0] = sin(incrementor);
+	zRot[0][1] = -sin(incrementor);
+	zRot[1][1] = cos(incrementor);
+	
 
-    gl_Position = vec4(position, 1.0f) * xRot * yRot; //* angleX;
+
+    gl_Position = vec4(position, 1.0f) * xRot * yRot * zRot; //* angleX;
 	fragmentCol = col;
 }
