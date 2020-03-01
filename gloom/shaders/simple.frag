@@ -5,5 +5,6 @@ in vec4 fragmentCol;
 
 void main()
 {
+    /* color = vec4(1, 0, 0, 1); */
     color = fragmentCol;
 }
