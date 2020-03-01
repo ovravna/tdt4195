@@ -6,12 +6,6 @@
 #include <math.h>
 
 
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/vec3.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 
 std::vector<float> vertices = { 
 	-0.6, -0.6, 0,
@@ -101,10 +95,10 @@ std::vector<float> cols = {
 	0, 0, 1, 0.5, 
 	0, 0, 1, 0.5,
 
-	0, 0, 0, 0.5,
-	0, 0, 0, 0.5, 
+	1, 1, 0, 0.5,
+	1, 1, 0, 0.5, 
 
-	0, 0, 1, 0.5,
+	/* 0, 0, 1, 0.5, */
 }; 
 
 /* std::vector<float> vertices{ */
