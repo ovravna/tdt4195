@@ -105,6 +105,12 @@ class Camera {
 			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 				position += glm::normalize(glm::cross(front, up)) * cameraSpeed;
 
+			if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+				front += glm::normalize(glm::cross(front, up)) * cameraSpeed;
+			}
+			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+				front -= glm::normalize(glm::cross(front, up)) * cameraSpeed;
+			}
 			/* else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) */
 			/* { */
 			/* 	/1* auto tempMat = glm::mat4x4(1.0); *1/ */
