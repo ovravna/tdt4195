@@ -20,6 +20,7 @@ class Camera {
           glm::mat4x4 projection;
           float speed;
           float rotation = 0;
+
           glm::vec3 front;
           glm::vec3 up;
           glm::vec3 position;
@@ -36,8 +37,8 @@ class Camera {
 
 			glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-			position = glm::vec3(0, 0, 3);
-			front = glm::vec3(0, 0, -1);
+			position = glm::vec3(0, 0, -3);
+			front = glm::vec3(0, 0, 1);
 			up = glm::vec3(0, 1, 0);
 
 			model = glm::mat4(1.0f);
@@ -67,6 +68,8 @@ class Camera {
 		}
 		void handleKeyboardInput()
 		{
+			tick();
+
 			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 			{
 				/* auto tempMat = glm::mat4x4(1.0); */

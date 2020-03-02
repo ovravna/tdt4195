@@ -4,22 +4,26 @@
 #include <vector>
 #include "gloom/shader.hpp"
 #include <math.h>
+#include <iostream>
 
 #include "camera.hpp"
+#include "textures.h"
+
+#include "stb_image.h"
 
 
-std::vector<float> vertices = { 
-	-0.6, -0.6, 0,
-	0.6, -0.6, 0,
-	0, 0.6, 0
+/* std::vector<float> vertices = { */ 
+/* 	-0.6, -0.6, 0, */
+/* 	0.6, -0.6, 0, */
+/* 	0, 0.6, 0 */
 
 
 
-	/* -0.5f, -0.5f, 0, */
-	/*  0.0f,  0.5f, 0, */
-	/*  0.5f, -0.5f, 0 */
-};
-std::vector<int> indices = { 1, 2, 0 };
+/* 	/1* -0.5f, -0.5f, 0, *1/ */
+/* 	/1*  0.0f,  0.5f, 0, *1/ */
+/* 	/1*  0.5f, -0.5f, 0 *1/ */
+/* }; */
+/* std::vector<int> indices = { 1, 2, 0 }; */
 
 std::vector<float> verts = {
 
@@ -55,14 +59,14 @@ std::vector<int> inds = {
 
 std::vector<float> cubeVert = {
 
-	 .5, -.5, -.5,
-	 .5,  .5, -.5,
-	-.5,  .5, -.5,
-	-.5, -.5, -.5,
-	 .5, -.5,  .5,
-	 .5,  .5,  .5,
-	-.5,  .5,  .5,
-	-.5, -.5,  .5,
+	 .5, -.5, -.5, 1, 0,
+	 .5,  .5, -.5, 1, 1,
+	-.5,  .5, -.5, 0, 1,
+	-.5, -.5, -.5, 0, 0,
+	 .5, -.5,  .5, 0, 1,
+	 .5,  .5,  .5, 0, 1,
+	-.5,  .5,  .5, 1, 1,
+	-.5, -.5,  .5, 1, 0,
 };
 
 
@@ -102,7 +106,17 @@ std::vector<float> cols = {
 
 	/* 0, 0, 1, 0.5, */
 }; 
-
+std::vector<float> vertices = {
+    // positions          // texture coords
+     0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
+     0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
+    -0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
+};
+std::vector<int> indices = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+};
 /* std::vector<float> vertices{ */
 /* 									-0.9,-0.9,0, */
 /* 									0,0.9,0, */
@@ -128,6 +142,7 @@ Gloom::Shader * loadShader() {
 }
 
 unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices, std::vector<float> rgba);
+unsigned int setupTexture();
 
 void runProgram(GLFWwindow* window)
 {
@@ -151,8 +166,9 @@ void runProgram(GLFWwindow* window)
     // Set up your scene here (create Vertex Array Objects, etc.)
 	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
-	unsigned int vertexArray = setupVAO(cubeVert, cubeInd, cols);
+	unsigned int vertexArray = setupVAO(vertices, indices, cols);
 
+	unsigned int texture = setupTexture();
 
 	auto cam = new Camera(window);
 	
@@ -175,7 +191,6 @@ void runProgram(GLFWwindow* window)
     while (!glfwWindowShouldClose(window))
     {
 		x += 0.01;
-		cam->tick();
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -188,8 +203,10 @@ void runProgram(GLFWwindow* window)
 
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vertexArray);
-		glDrawElements(GL_TRIANGLES, cubeInd.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, vertices.size(), GL_UNSIGNED_INT, 0);
+		/* glDrawArrays(GL_TRIANGLES, */ 
 
         // Handle other events
         glfwPollEvents();
@@ -212,7 +229,37 @@ void handleKeyboardInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
+ 
+unsigned int setupTexture() {
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	int width, height, nrChannels;
+	unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	
+	/* unsigned char * data = (unsigned char*) dog; */
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
 
+
+
+
+	return texture;
+}
 
 unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices, std::vector<float> rgba) {
 
@@ -228,16 +275,18 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> ind
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCoordinates.size(), vertexCoordinates.data(), GL_STATIC_DRAW); 
 
 	
-	unsigned int index = 0;  // todo: why does this need to be 0?????
-	glEnableVertexAttribArray(index);
+	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray);
-	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+
+	glEnableVertexAttribArray(2);
+	/* glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO); */
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	unsigned int rgbaVBO = 0;
 	glGenBuffers(1, &rgbaVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
-
 
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
