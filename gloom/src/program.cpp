@@ -175,11 +175,12 @@ void runProgram(GLFWwindow* window)
     while (!glfwWindowShouldClose(window))
     {
 		x += 0.01;
+		cam->tick();
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glad_glUniform1f(myUniformLocation, 0.5*sinf(x));
-		glad_glUniform1f(incrementorLocation, x);
+		/* glad_glUniform1f(myUniformLocation, 0.5*sinf(x)); */
+		/* glad_glUniform1f(incrementorLocation, x); */
 
 		glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel());
 		glad_glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, cam->getProjection());

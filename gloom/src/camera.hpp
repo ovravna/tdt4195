@@ -35,19 +35,20 @@ class Camera {
 			speed = 0.01;
 
 			glfwGetWindowSize(window, &windowWidth, &windowHeight);
-			position = glm::vec3(0, 0, 1);
 
-			front = glm::vec3(0, 0, 0);
+			position = glm::vec3(0, 0, 3);
+			front = glm::vec3(0, 0, -1);
 			up = glm::vec3(0, 1, 0);
 
 			model = glm::mat4(1.0f);
 			/* model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); */ 
 
 			view = glm::mat4x4(1.0);
-			view = glm::translate(view, glm::vec3(0, 0, -3));
+			/* view = glm::translate(view, glm::vec3(0, 0, -3)); */
+			view = glm::lookAt(position, position + front, up);
 
 		
-			projection = glm::mat4x4(1.0);
+			/* projection = glm::mat4x4(1.0); */
 			projection = glm::perspective(glm::radians(45.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	
 
@@ -60,6 +61,10 @@ class Camera {
 		float * getModel() { return glm::value_ptr(model); };
 		float * getProjection() { return glm::value_ptr(projection); };
 
+		void tick() {
+				/* model = glm::rotate(model, glm::radians(10.0f) * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f)); */ 
+			view = glm::lookAt(position, position + front, up);
+		}
 		void handleKeyboardInput()
 		{
 			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -90,21 +95,31 @@ class Camera {
 				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(1.0f, 0.0f, 0.0f)); 
 			}
 
-			else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			{
-				/* auto tempMat = glm::mat4x4(1.0); */
-				/* tempMat[1][3] = -speed; */
-				/* viewMatrix *= tempMat; */
-				rotation += 0.1;
-				float r = 1; 
-				position = glm::vec3(sinf(rotation) * r, 0, cosf(rotation) * r);
+			const float cameraSpeed = 0.05f; // adjust accordingly
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+				position += cameraSpeed * front;
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+				position -= cameraSpeed * front;
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+				position -= glm::normalize(glm::cross(front, up)) * cameraSpeed;
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+				position += glm::normalize(glm::cross(front, up)) * cameraSpeed;
+
+			/* else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) */
+			/* { */
+			/* 	/1* auto tempMat = glm::mat4x4(1.0); *1/ */
+			/* 	/1* tempMat[1][3] = -speed; *1/ */
+			/* 	/1* viewMatrix *= tempMat; *1/ */
+			/* 	rotation += 0.1; */
+			/* 	float r = 1; */ 
+			/* 	position = glm::vec3(sinf(rotation) * r, 0, cosf(rotation) * r); */
 				
-				std::printf("%s\n", glm::to_string(position).c_str());
+			/* 	std::printf("%s\n", glm::to_string(position).c_str()); */
 				
 
-				auto mat = glm::lookAt(position, front, up);
-				view = mat;
-			}
+			/* 	auto mat = glm::lookAt(position, front, up); */
+			/* 	view = mat; */
+			/* } */
 
 		}
 		
