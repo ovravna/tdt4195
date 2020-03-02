@@ -14,6 +14,7 @@ std::vector<float> vertices = {
 	0, 0.6, 0
 
 
+
 	/* -0.5f, -0.5f, 0, */
 	/*  0.0f,  0.5f, 0, */
 	/*  0.5f, -0.5f, 0 */
@@ -144,7 +145,7 @@ void runProgram(GLFWwindow* window)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(1, 1, 1, 1);
+    glClearColor(0.2, 0.2, 0.2, 1);
 	auto shader = loadShader();
 
     // Set up your scene here (create Vertex Array Objects, etc.)
@@ -153,16 +154,19 @@ void runProgram(GLFWwindow* window)
 	unsigned int vertexArray = setupVAO(cubeVert, cubeInd, cols);
 
 
-	auto cam = new Camera();
+	auto cam = new Camera(window);
 	
 	
 	shader->activate();
 	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
 	auto incrementorLocation = glGetUniformLocation(shader->get(), "incrementor");
-	auto viewMatrixLocation = glGetUniformLocation(shader->get(), "viewMatrix");
+
+	auto viewLocation = glGetUniformLocation(shader->get(), "view");
+	auto modelLocation = glGetUniformLocation(shader->get(), "model");
+	auto projectionLocation = glGetUniformLocation(shader->get(), "projection");
+
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
-	
 	
 
 	float x = 0;
@@ -177,7 +181,10 @@ void runProgram(GLFWwindow* window)
 		glad_glUniform1f(myUniformLocation, 0.5*sinf(x));
 		glad_glUniform1f(incrementorLocation, x);
 
-		glad_glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, cam->getViewMatrix());
+		glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel());
+		glad_glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, cam->getProjection());
+		glad_glUniformMatrix4fv(viewLocation, 1, GL_FALSE, cam->getView());
+
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
 		glBindVertexArray(vertexArray);
@@ -186,7 +193,7 @@ void runProgram(GLFWwindow* window)
         // Handle other events
         glfwPollEvents();
         handleKeyboardInput(window);
-		cam->handleKeyboardInput(window);
+		cam->handleKeyboardInput();
 
         // Flip buffers
         glfwSwapBuffers(window);

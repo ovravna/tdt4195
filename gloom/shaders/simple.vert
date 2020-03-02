@@ -10,7 +10,9 @@ mat4 matrixVariable;
 uniform float osilator;
 uniform float incrementor;
 
-uniform mat4x4 viewMatrix;
+uniform mat4x4 view;
+uniform mat4x4 model;
+uniform mat4x4 projection;
 
 
 mat4x4 matrix = {
@@ -70,8 +72,10 @@ void main()
 	movement[0][3] = r * cosx;
 	movement[1][3] = r * sinx;
 
-	mat4x4 transform = movement * scale * xRot * yRot * viewMatrix;
+	/* mat4x4 transform = movement * scale * xRot * yRot * viewMatrix; */
+	mat4x4 transform = projection * view * model;
 
-    gl_Position = vec4(position, 1.0f) * transform; 
+    gl_Position = projection * view * model * vec4(position, 1.0f); 
+
 	fragmentCol = col;
 }

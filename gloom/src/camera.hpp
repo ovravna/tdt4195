@@ -7,58 +7,107 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "glm/gtx/string_cast.hpp"
 #include <cstdio>
 #include <GLFW/glfw3.h>
 /* #include <glad/glad.h> */
 
 class Camera {
 
+	private:
+          glm::mat4x4 view;
+          glm::mat4x4 model;
+          glm::mat4x4 projection;
+          float speed;
+          float rotation = 0;
+          glm::vec3 front;
+          glm::vec3 up;
+          glm::vec3 position;
+
+          int windowHeight, windowWidth;
+          GLFWwindow *window;
+
 	public:
-		Camera() {
-			viewMatrix = glm::mat4x4(1.0);
-			speed = 0.05;
+		Camera(GLFWwindow* window) {
+			this->window = window;
+
+
+			speed = 0.01;
+
+			glfwGetWindowSize(window, &windowWidth, &windowHeight);
+			position = glm::vec3(0, 0, 1);
+
+			front = glm::vec3(0, 0, 0);
+			up = glm::vec3(0, 1, 0);
+
+			model = glm::mat4(1.0f);
+			/* model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); */ 
+
+			view = glm::mat4x4(1.0);
+			view = glm::translate(view, glm::vec3(0, 0, -3));
+
+		
+			projection = glm::mat4x4(1.0);
+			projection = glm::perspective(glm::radians(45.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+	
+
+			/* view *= glm::lookAt(position, front, up); */
+
 
 		};
-		
-		float * getViewMatrix() { return glm::value_ptr(viewMatrix); };
 
-		void handleKeyboardInput(GLFWwindow* window)
+		float * getView() { return glm::value_ptr(view); };
+		float * getModel() { return glm::value_ptr(model); };
+		float * getProjection() { return glm::value_ptr(projection); };
+
+		void handleKeyboardInput()
 		{
 			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 			{
-				auto tempMat = glm::mat4x4(1.0);
-				tempMat[0][3] = speed;
+				/* auto tempMat = glm::mat4x4(1.0); */
+				/* tempMat[0][3] = speed; */
 
-				viewMatrix *= tempMat;
+				/* view *= tempMat; */
 
+
+				rotation += speed;
+				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(0.0f, 1.0f, 0.0f)); 
 			}
+
 			else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 			{
-				auto tempMat = glm::mat4x4(1.0);
-				tempMat[0][3] = -speed;
-
-				viewMatrix *= tempMat;
+				rotation -= speed;
+				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(0.0f, 1.0f, 0.0f)); 
 			}
 			else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 			{
-				auto tempMat = glm::mat4x4(1.0);
-				tempMat[1][3] = speed;
-
-				viewMatrix *= tempMat;
+				rotation -= speed;
+				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(1.0f, 0.0f, 0.0f)); 
 			}
 			else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 			{
-				auto tempMat = glm::mat4x4(1.0);
-				tempMat[1][3] = -speed;
-
-				viewMatrix *= tempMat;
+				rotation += speed;
+				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(1.0f, 0.0f, 0.0f)); 
 			}
+
+			else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			{
+				/* auto tempMat = glm::mat4x4(1.0); */
+				/* tempMat[1][3] = -speed; */
+				/* viewMatrix *= tempMat; */
+				rotation += 0.1;
+				float r = 1; 
+				position = glm::vec3(sinf(rotation) * r, 0, cosf(rotation) * r);
+				
+				std::printf("%s\n", glm::to_string(position).c_str());
+				
+
+				auto mat = glm::lookAt(position, front, up);
+				view = mat;
+			}
+
 		}
-
-	private:
-
-		glm::mat4x4 viewMatrix;
-		float speed;
+		
 };
 
 
