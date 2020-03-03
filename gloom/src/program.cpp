@@ -208,10 +208,12 @@ void runProgram(GLFWwindow* window)
 
 	unsigned int texture = setupTexture();
 
+
 	auto cam = new Camera(window);
 	
 	
 	shader->activate();
+
 	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
 	auto incrementorLocation = glGetUniformLocation(shader->get(), "incrementor");
 

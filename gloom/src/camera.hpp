@@ -15,14 +15,17 @@
 class Camera {
 
 	private:
+		  const float cameraSpeed = 0.05f; // adjust accordingly
           glm::mat4x4 view;
           glm::mat4x4 model;
           glm::mat4x4 projection;
           float speed;
           float rotation = 0;
 
-          glm::vec3 front;
           glm::vec3 up;
+          glm::vec3 right;
+
+          glm::vec3 front;
           glm::vec3 position;
 
           int windowHeight, windowWidth;
@@ -37,9 +40,12 @@ class Camera {
 
 			glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
+			up = glm::vec3(0, 1, 0);
+			right = glm::vec3(1, 0, 0);
+
+
 			position = glm::vec3(0, 0, -3);
 			front = glm::vec3(0, 0, 1);
-			up = glm::vec3(0, 1, 0);
 
 			model = glm::mat4(1.0f);
 			/* model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); */ 
@@ -72,33 +78,24 @@ class Camera {
 
 			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 			{
-				/* auto tempMat = glm::mat4x4(1.0); */
-				/* tempMat[0][3] = speed; */
-
-				/* view *= tempMat; */
-
-
-				rotation += speed;
-				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(0.0f, 1.0f, 0.0f)); 
+				front += glm::normalize(glm::cross(front, up)) * cameraSpeed;
 			}
 
-			else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 			{
-				rotation -= speed;
-				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(0.0f, 1.0f, 0.0f)); 
+				front -= glm::normalize(glm::cross(front, up)) * cameraSpeed;
 			}
-			else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 			{
-				rotation -= speed;
-				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(1.0f, 0.0f, 0.0f)); 
+				auto right = glm::normalize(glm::cross(front, up));
+				front -= glm::normalize(glm::cross(front, right)) * cameraSpeed;
 			}
-			else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 			{
-				rotation += speed;
-				model = glm::rotate(model, glm::radians(50.0f) * rotation, glm::vec3(1.0f, 0.0f, 0.0f)); 
+				auto right = glm::normalize(glm::cross(front, up));
+				front +=  glm::normalize(glm::cross(front, right))* cameraSpeed;
 			}
 
-			const float cameraSpeed = 0.05f; // adjust accordingly
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 				position += cameraSpeed * front;
 			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
