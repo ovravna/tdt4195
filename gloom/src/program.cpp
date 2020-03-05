@@ -181,7 +181,8 @@ Gloom::Shader * loadShader(std::string frag, std::string vert) {
 
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba);
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
+
 unsigned int setupTexture(std::string texFile);
 
 void runProgram(GLFWwindow* window)
@@ -208,7 +209,7 @@ void runProgram(GLFWwindow* window)
 	
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
-	unsigned int vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours);
+	unsigned int vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
 	/* unsigned int texture = setupTexture("container.jpg"); */
 
 
@@ -299,7 +300,7 @@ unsigned int setupTexture(std::string texFile) {
 	return texture;
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba) {
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals) {
 
 	unsigned int vertexArray = 0;
 	glGenVertexArrays(1, &vertexArray);
@@ -321,6 +322,16 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned
 	/* /1* glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO); *1/ */
 	/* glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); */
 
+	unsigned int normalsVBO = 0;
+	glGenBuffers(1, &normalsVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * normals.size(), normals.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	
 	unsigned int rgbaVBO = 0;
 	glGenBuffers(1, &rgbaVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);

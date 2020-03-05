@@ -20,6 +20,7 @@ class Camera {
 		  double diffMouseX, diffMouseY;
 		  
 		  const float cameraSpeed = 0.05f; // adjust accordingly
+		  const float cameraMoveSpeed = 0.8f; // adjust accordingly
           
 		  /* glm::vec3 direction; */
 		  float pitch, yaw;
@@ -143,13 +144,13 @@ class Camera {
 			}
 
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				position += cameraSpeed * front;
+				position += cameraMoveSpeed * front;
 			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				position -= cameraSpeed * front;
+				position -= cameraMoveSpeed * front;
 			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				position -= glm::normalize(glm::cross(front, up)) * cameraSpeed;
+				position -= glm::normalize(glm::cross(front, up)) * cameraMoveSpeed;
 			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				position += glm::normalize(glm::cross(front, up)) * cameraSpeed;
+				position += glm::normalize(glm::cross(front, up)) * cameraMoveSpeed;
 
 			if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 				front += glm::normalize(glm::cross(front, up)) * cameraSpeed;
