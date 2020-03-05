@@ -23,55 +23,8 @@ Gloom::Shader * loadShader(std::string frag, std::string vert) {
 	return shader;
 
 }
-unsigned int genVertexArrayObject(std::vector<float> vertices, std::vector<unsigned int> indices, std::vector<float> colours, std::vector<float> normals)
-{
-    // create vao
-    unsigned int vertexArray;
-    glGenVertexArrays(1, &vertexArray);
-    glBindVertexArray(vertexArray);
 
-    // create vbo
-    unsigned int vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), &vertices.front(), GL_STATIC_DRAW);
-
-    // create vaa for vertex_array
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    // create ibo
-    unsigned int indexBuffer;
-    glGenBuffers(1, &indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(int), &indices.front(), GL_STATIC_DRAW);
-
-    //crate colour buffer
-    unsigned int colourBuffer;
-    glGenBuffers(1, &colourBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colourBuffer);
-    glBufferData(GL_ARRAY_BUFFER, colours.size()*sizeof(float), &colours.front(), GL_STATIC_DRAW);
-
-    //vaa for color_array
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(1);
-
-    //crate normal buffer
-    unsigned int normalBuffer;
-    glGenBuffers(1, &normalBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-    glBufferData(GL_ARRAY_BUFFER, normals.size()*sizeof(float), &normals.front(), GL_STATIC_DRAW);
-
-    //vaa for normal_array
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(3);
-
-    return vertexArray;
-}
-
-
-void activateVAO(VAO o);
-VAO * setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
 unsigned int setupTexture(std::string texFile);
 
 void runProgram(GLFWwindow* window)
@@ -99,15 +52,14 @@ void runProgram(GLFWwindow* window)
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
 	Helicopter heli = loadHelicopterModel("gloom/resources/helicopter.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
-	auto vertexArray = genVertexArrayObject(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
-	auto bodyHeliVAO = genVertexArrayObject(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
-	auto mainRotorVAO = genVertexArrayObject(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
-	auto tailRotorVAO = genVertexArrayObject(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
-	auto doorVAO = genVertexArrayObject(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
+	auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
+	auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
+	auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
+	auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
+	auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
 	/* unsigned int texture = setupTexture("container.jpg"); */
 
 
-	/* activateVAO(bodyHeliVAO); */
 
 
 	auto cam = new Camera(window);
@@ -156,9 +108,6 @@ void runProgram(GLFWwindow* window)
 		glBindVertexArray(doorVAO);
 		glDrawElements(GL_TRIANGLES, heli.door.indices.size(), GL_UNSIGNED_INT, 0);
 
-		/* activateVAO(*mainRotorVAO); */
-		/* glBindVertexArray(mainRotorVAO->vao); */
-		/* glDrawElements(GL_TRIANGLES, heli.mainRotor.vertices.size(), GL_UNSIGNED_INT, 0); */
 		/* glDrawArrays(GL_TRIANGLES, 0, 36); */
 
         // Handle other events
@@ -214,67 +163,51 @@ unsigned int setupTexture(std::string texFile) {
 	return texture;
 }
 
-void activateVAO(VAO o) {
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, o.vao);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals) {
 
-	glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, o.normalVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, o.colorVBO);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-}
-
-
-VAO * setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals) {
-
-	VAO * o = new VAO();
 	
-	/* unsigned int vertexArray = 0; */
-	glGenVertexArrays(1, &o->vao);
-	glBindVertexArray(o->vao);
+	unsigned int vertexArray = 0;
+	glGenVertexArrays(1, &vertexArray);
+	glBindVertexArray(vertexArray);
 	
-	/* unsigned int vertexBuffer = 0; */ 
-	glGenBuffers(1, &o->vertexVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, o->vertexVBO);
+	unsigned int vertexBuffer = 0; 
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCoordinates.size(), vertexCoordinates.data(), GL_STATIC_DRAW); 
 
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
 	
-	/* unsigned int normalsVBO = 0; */
-	glGenBuffers(1, &o->normalVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, o->normalVBO);
+	unsigned int normalsBuffer = 0;
+	glGenBuffers(1, &normalsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * normals.size(), normals.data(), GL_STATIC_DRAW);
 	
-	/* unsigned int rgbaVBO = 0; */
-	glGenBuffers(1, &o->colorVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, o->colorVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(3);
+
+	unsigned int colorBuffer = 0;
+	glGenBuffers(1, &colorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
 
-	/* unsigned int indexBuffer = 0; */
-	glGenBuffers(1, &o->indexVBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o->indexVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+
+	unsigned int indexBuffer = 0;
+	glGenBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, o->vao);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, o->normalVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, o->colorVBO);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 
 	printGLError();
 	
-	return o;
+	return vertexArray;
 }
