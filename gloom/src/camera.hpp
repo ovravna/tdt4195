@@ -64,7 +64,7 @@ class Camera {
 
 		
 			/* projection = glm::mat4x4(1.0); */
-			projection = glm::perspective(glm::radians(45.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(45.0f), float(windowWidth) / float(windowHeight), 0.1f, 1000.0f);
 	
 
 			/* view *= glm::lookAt(position, front, up); */
@@ -78,7 +78,7 @@ class Camera {
 
 		void tick() {
 			/* float xoffset = xpos - lastX; */
-			/* float yoffset = lastY - ypos; */ 
+			/* float yo	if (false) {ffset = lastY - ypos; */ 
 			/* lastX = xpos; */
 			/* lastY = ypos; */
 			if (false) {	

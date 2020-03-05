@@ -9,6 +9,7 @@
 
 #include "camera.hpp"
 #include "textures.h"
+#include "OBJLoader.hpp"
 
 #include "stb_image.h"
 
@@ -172,16 +173,16 @@ std::vector<int> indices = {
 
 
 
-Gloom::Shader * loadShader() {
+Gloom::Shader * loadShader(std::string frag, std::string vert) {
 
 	Gloom::Shader * shader = new Gloom::Shader(); 
-	shader->makeBasicShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
+	shader->makeBasicShader(frag, vert);
 	return shader;
 
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices, std::vector<float> rgba);
-unsigned int setupTexture();
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba);
+unsigned int setupTexture(std::string texFile);
 
 void runProgram(GLFWwindow* window)
 {
@@ -201,14 +202,15 @@ void runProgram(GLFWwindow* window)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glClearColor(0.2, 0.2, 0.2, 1);
-	auto shader = loadShader();
 
     // Set up your scene here (create Vertex Array Objects, etc.)
 	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
-	unsigned int vertexArray = setupVAO(vertices, indices, cols);
+	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
+	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
+	unsigned int vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours);
+	/* unsigned int texture = setupTexture("container.jpg"); */
 
-	unsigned int texture = setupTexture();
 
 
 	auto cam = new Camera(window);
@@ -225,19 +227,13 @@ void runProgram(GLFWwindow* window)
 
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
-	
-
-	float x = 0;
 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
-		x += 0.01;
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		/* glad_glUniform1f(myUniformLocation, 0.5*sinf(x)); */
-		/* glad_glUniform1f(incrementorLocation, x); */
 
 		glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel());
 		glad_glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, cam->getProjection());
@@ -245,10 +241,10 @@ void runProgram(GLFWwindow* window)
 
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
-		glBindTexture(GL_TEXTURE_2D, texture);
+		/* glBindTexture(GL_TEXTURE_2D, texture); */
 		glBindVertexArray(vertexArray);
-		/* glDrawElements(GL_TRIANGLES, vertices.size(), GL_UNSIGNED_INT, 0); */
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, lunar.vertexCount(), GL_UNSIGNED_INT, 0);
+		/* glDrawArrays(GL_TRIANGLES, 0, 36); */
 
         // Handle other events
         glfwPollEvents();
@@ -272,7 +268,7 @@ void handleKeyboardInput(GLFWwindow* window)
     }
 }
  
-unsigned int setupTexture() {
+unsigned int setupTexture(std::string texFile) {
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -283,7 +279,7 @@ unsigned int setupTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// load and generate the texture
 	int width, height, nrChannels;
-	unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char *data = stbi_load(texFile.c_str(), &width, &height, &nrChannels, 0);
 	
 	/* unsigned char * data = (unsigned char*) dog; */
 	if (data)
@@ -303,7 +299,7 @@ unsigned int setupTexture() {
 	return texture;
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> indices, std::vector<float> rgba) {
+unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba) {
 
 	unsigned int vertexArray = 0;
 	glGenVertexArrays(1, &vertexArray);
@@ -319,11 +315,11 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<int> ind
 	
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glEnableVertexAttribArray(2);
-	/* glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO); */
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	/* glEnableVertexAttribArray(2); */
+	/* /1* glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO); *1/ */
+	/* glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); */
 
 	unsigned int rgbaVBO = 0;
 	glGenBuffers(1, &rgbaVBO);
