@@ -15,8 +15,16 @@
 class Camera {
 
 	private:
+		  double mousex, mousey;
+		  bool isMouseInit;
+		  double diffMouseX, diffMouseY;
+		  
 		  const float cameraSpeed = 0.05f; // adjust accordingly
-          glm::mat4x4 view;
+          
+		  /* glm::vec3 direction; */
+		  float pitch, yaw;
+
+		  glm::mat4x4 view;
           glm::mat4x4 model;
           glm::mat4x4 projection;
           float speed;
@@ -69,8 +77,46 @@ class Camera {
 		float * getProjection() { return glm::value_ptr(projection); };
 
 		void tick() {
-				/* model = glm::rotate(model, glm::radians(10.0f) * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f)); */ 
+			/* float xoffset = xpos - lastX; */
+			/* float yoffset = lastY - ypos; */ 
+			/* lastX = xpos; */
+			/* lastY = ypos; */
+			if (false) {	
+				float sensitivity = 0.05;
+				/* xoffset *= sensitivity; */
+				/* yoffset *= sensitivity; */
+
+				yaw   += diffMouseX * sensitivity;
+				pitch += diffMouseY * sensitivity;
+
+				if(pitch > 89.0f)
+					pitch = 89.0f;
+				if(pitch < -89.0f)
+					pitch = -89.0f;
+
+				glm::vec3 direction;
+				direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+				direction.y = sin(glm::radians(pitch));
+				direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+				front = glm::normalize(direction); 
+			}
 			view = glm::lookAt(position, position + front, up);
+		}
+
+		void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+			
+			/* printf("kake!"); */
+			if (!isMouseInit) {
+			  mousex = xpos;
+			  mousey = ypos;
+			  isMouseInit = true;
+			}
+			diffMouseX = xpos - mousex;
+			diffMouseY = ypos - mousey;
+
+			mousex = xpos;
+			mousey = ypos;
+
 		}
 		void handleKeyboardInput()
 		{

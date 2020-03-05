@@ -5,6 +5,7 @@
 #include "gloom/shader.hpp"
 #include <math.h>
 #include <iostream>
+#include <functional>
 
 #include "camera.hpp"
 #include "textures.h"
@@ -193,6 +194,7 @@ void runProgram(GLFWwindow* window)
 	glDisable(GL_CULL_FACE); 
 	/* glFrontFace(GL_CW); */
 
+	/* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */  
     // Set default colour after clearing the colour buffer
 
 	glEnable(GL_BLEND);
@@ -210,7 +212,7 @@ void runProgram(GLFWwindow* window)
 
 
 	auto cam = new Camera(window);
-	
+	/* glfwSetCursorPosCallback(window, ); */  
 	
 	shader->activate();
 
