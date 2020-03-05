@@ -13,7 +13,7 @@ vec3 c;
 void main()
 {
     /* color = vec4(1, 0, 0, 1); */
-	c = vec3(1, 0, 0) * max(vec3(0), fragmentNormal * -lightDirection);
+	c = fragmentCol.xyz * max(0, dot(fragmentNormal, -lightDirection));
     color = vec4(c, 1.0);
     /* color = texture(myTexture, TexCoord); */
 	
