@@ -23,6 +23,52 @@ Gloom::Shader * loadShader(std::string frag, std::string vert) {
 	return shader;
 
 }
+unsigned int genVertexArrayObject(std::vector<float> vertices, std::vector<unsigned int> indices, std::vector<float> colours, std::vector<float> normals)
+{
+    // create vao
+    unsigned int vertexArray;
+    glGenVertexArrays(1, &vertexArray);
+    glBindVertexArray(vertexArray);
+
+    // create vbo
+    unsigned int vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), &vertices.front(), GL_STATIC_DRAW);
+
+    // create vaa for vertex_array
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    // create ibo
+    unsigned int indexBuffer;
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(int), &indices.front(), GL_STATIC_DRAW);
+
+    //crate colour buffer
+    unsigned int colourBuffer;
+    glGenBuffers(1, &colourBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colourBuffer);
+    glBufferData(GL_ARRAY_BUFFER, colours.size()*sizeof(float), &colours.front(), GL_STATIC_DRAW);
+
+    //vaa for color_array
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+
+    //crate normal buffer
+    unsigned int normalBuffer;
+    glGenBuffers(1, &normalBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+    glBufferData(GL_ARRAY_BUFFER, normals.size()*sizeof(float), &normals.front(), GL_STATIC_DRAW);
+
+    //vaa for normal_array
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(3);
+
+    return vertexArray;
+}
+
 
 void activateVAO(VAO o);
 VAO * setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
@@ -53,11 +99,11 @@ void runProgram(GLFWwindow* window)
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
 	Helicopter heli = loadHelicopterModel("gloom/resources/helicopter.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
-	/* auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
-	auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
-	auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
-	auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
-	auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
+	auto vertexArray = genVertexArrayObject(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
+	auto bodyHeliVAO = genVertexArrayObject(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
+	auto mainRotorVAO = genVertexArrayObject(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
+	auto tailRotorVAO = genVertexArrayObject(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
+	auto doorVAO = genVertexArrayObject(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
 	/* unsigned int texture = setupTexture("container.jpg"); */
 
 
@@ -94,16 +140,25 @@ void runProgram(GLFWwindow* window)
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
 		/* glBindTexture(GL_TEXTURE_2D, texture); */
 
-		/* glBindVertexArray(vertexArray->vao); */
-		/* glDrawElements(GL_TRIANGLES, lunar.vertexCount(), GL_UNSIGNED_INT, 0); */
+		glBindVertexArray(vertexArray);
+		glDrawElements(GL_TRIANGLES, lunar.indices.size(), GL_UNSIGNED_INT, 0);
 
-		activateVAO(*bodyHeliVAO);
-		glBindVertexArray(bodyHeliVAO->vao);
-		glDrawElements(GL_TRIANGLES, heli.body.vertexCount(), GL_UNSIGNED_INT, 0);
+		/* activateVAO(*bodyHeliVAO); */
+		glBindVertexArray(bodyHeliVAO);
+		glDrawElements(GL_TRIANGLES, heli.body.indices.size(), GL_UNSIGNED_INT, 0);
 
-		activateVAO(*mainRotorVAO);
-		glBindVertexArray(mainRotorVAO->vao);
-		glDrawElements(GL_TRIANGLES, heli.mainRotor.vertexCount(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(mainRotorVAO);
+		glDrawElements(GL_TRIANGLES, heli.mainRotor.indices.size(), GL_UNSIGNED_INT, 0);
+
+		glBindVertexArray(tailRotorVAO);
+		glDrawElements(GL_TRIANGLES, heli.tailRotor.indices.size(), GL_UNSIGNED_INT, 0);
+
+		glBindVertexArray(doorVAO);
+		glDrawElements(GL_TRIANGLES, heli.door.indices.size(), GL_UNSIGNED_INT, 0);
+
+		/* activateVAO(*mainRotorVAO); */
+		/* glBindVertexArray(mainRotorVAO->vao); */
+		/* glDrawElements(GL_TRIANGLES, heli.mainRotor.vertices.size(), GL_UNSIGNED_INT, 0); */
 		/* glDrawArrays(GL_TRIANGLES, 0, 36); */
 
         // Handle other events
