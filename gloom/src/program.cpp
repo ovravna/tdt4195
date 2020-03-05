@@ -13,176 +13,19 @@
 
 #include "stb_image.h"
 
-
-/* std::vector<float> vertices = { */ 
-/* 	-0.6, -0.6, 0, */
-/* 	0.6, -0.6, 0, */
-/* 	0, 0.6, 0 */
-
-
-
-/* 	/1* -0.5f, -0.5f, 0, *1/ */
-/* 	/1*  0.0f,  0.5f, 0, *1/ */
-/* 	/1*  0.5f, -0.5f, 0 *1/ */
-/* }; */
-/* std::vector<int> indices = { 1, 2, 0 }; */
-
-std::vector<float> verts = {
-
-	0.0, 0.1, -0.0,  //0
-
-	-.2, 0.1, -0.,		//1
-	.6, 0.1, -0.,		//2
-	0.2, -.4, -0.,	//3
-	-.5, 0.2, -0.1,	//1
-	.5, 0.2, -0.1,		//2
-	0., -.3, -0.1,	//3
-	-.6, 0, -0.2,	//1
-	.6, 0, -0.2,		//2
-	0., -.6, -0.2,	//3
-	
-	/* .6, -.8, -1.2, */
-	/* 0,  .4,  0, */
-	/* -.8, -.2, 1.2 */
+struct VAO {
+	unsigned int vao, vertexVBO, indexVBO, colorVBO, normalVBO;
 };
-
-
-std::vector<int> inds = {
-	/* 0, 4, 1, */
-	/* 0, 2, 4, */
-	/* 0, 3, 2, */  
-	/* 0, 1, 3, */
-	/* 4, 2, 5, */
-	1, 3, 2,
-	4, 6, 5,
-	7, 9, 8
-};
-
-
-std::vector<float> cubeVert = {
-
-	 .5, -.5, -.5, 1, 0,
-	 .5,  .5, -.5, 1, 1,
-	-.5,  .5, -.5, 0, 1,
-	-.5, -.5, -.5, 0, 0,
-	 .5, -.5,  .5, 0, 1,
-	 .5,  .5,  .5, 0, 1,
-	-.5,  .5,  .5, 1, 1,
-	-.5, -.5,  .5, 1, 0,
-};
-
-
-std::vector<int> cubeInd = {
-	0, 1, 2,
-	0, 2, 3,
-
-	0, 4, 5,
-	0, 5, 1,
-
-	4, 7, 6, 
-	4, 6, 5,
-
-	3, 2, 7, 
-	2, 6, 7,
-
-	1, 5, 6,
-	1, 6, 2,
-
-	0, 7, 4,
-	0, 3, 7,
-};
-
-std::vector<float> cols = {
-	/* 1, 1, 1, 0.5, */
-	1, 0, 0, 0.5,
-	1, 0, 0, 0.5,
-
-	0, 1, 0, 0.5,
-	0, 1, 0, 0.5,
-
-	0, 0, 1, 0.5, 
-	0, 0, 1, 0.5,
-
-	1, 1, 0, 0.5,
-	1, 1, 0, 0.5, 
-
-	/* 0, 0, 1, 0.5, */
-}; 
-std::vector<float> vertices = {
-    
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
-std::vector<int> indices = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-};
-/* std::vector<float> vertices{ */
-/* 									-0.9,-0.9,0, */
-/* 									0,0.9,0, */
-/* 									0.5,-0.9,0, */
-/* 									0.6,-0.9,0, */
-/* 									0.9,0.9,0, */
-/* 									0.1,0.9,0 */
-/* }; */
-
-/* std::vector<int> indices{ */	
-/* 	2,1,0, */
-/* 	3,4,5 */
-/* }; */
-
-
 
 Gloom::Shader * loadShader(std::string frag, std::string vert) {
-
 	Gloom::Shader * shader = new Gloom::Shader(); 
 	shader->makeBasicShader(frag, vert);
 	return shader;
 
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
-
+void activateVAO(VAO o);
+VAO * setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
 unsigned int setupTexture(std::string texFile);
 
 void runProgram(GLFWwindow* window)
@@ -208,10 +51,17 @@ void runProgram(GLFWwindow* window)
 	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
+	Helicopter heli = loadHelicopterModel("gloom/resources/helicopter.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
-	unsigned int vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
+	/* auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
+	auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
+	auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
+	auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
+	auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
 	/* unsigned int texture = setupTexture("container.jpg"); */
 
+
+	/* activateVAO(bodyHeliVAO); */
 
 
 	auto cam = new Camera(window);
@@ -243,8 +93,17 @@ void runProgram(GLFWwindow* window)
         // Draw your scene here
 		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
 		/* glBindTexture(GL_TEXTURE_2D, texture); */
-		glBindVertexArray(vertexArray);
-		glDrawElements(GL_TRIANGLES, lunar.vertexCount(), GL_UNSIGNED_INT, 0);
+
+		/* glBindVertexArray(vertexArray->vao); */
+		/* glDrawElements(GL_TRIANGLES, lunar.vertexCount(), GL_UNSIGNED_INT, 0); */
+
+		activateVAO(*bodyHeliVAO);
+		glBindVertexArray(bodyHeliVAO->vao);
+		glDrawElements(GL_TRIANGLES, heli.body.vertexCount(), GL_UNSIGNED_INT, 0);
+
+		activateVAO(*mainRotorVAO);
+		glBindVertexArray(mainRotorVAO->vao);
+		glDrawElements(GL_TRIANGLES, heli.mainRotor.vertexCount(), GL_UNSIGNED_INT, 0);
 		/* glDrawArrays(GL_TRIANGLES, 0, 36); */
 
         // Handle other events
@@ -300,53 +159,67 @@ unsigned int setupTexture(std::string texFile) {
 	return texture;
 }
 
-unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals) {
+void activateVAO(VAO o) {
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, o.vao);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	unsigned int vertexArray = 0;
-	glGenVertexArrays(1, &vertexArray);
-	glBindVertexArray(vertexArray);
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, o.normalVBO);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, o.colorVBO);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+}
+
+
+VAO * setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals) {
+
+	VAO * o = new VAO();
 	
-	unsigned int vertexBuffer = 0; 
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArray);
-
-	/* float vertices[] = {1.0, 3.0, 2.0, 5.0, 4.0, 3.0, 2.0, 6.0, 3.0}; */
+	/* unsigned int vertexArray = 0; */
+	glGenVertexArrays(1, &o->vao);
+	glBindVertexArray(o->vao);
+	
+	/* unsigned int vertexBuffer = 0; */ 
+	glGenBuffers(1, &o->vertexVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, o->vertexVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCoordinates.size(), vertexCoordinates.data(), GL_STATIC_DRAW); 
 
 	
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArray);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	/* glEnableVertexAttribArray(2); */
-	/* /1* glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO); *1/ */
-	/* glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); */
-
-	unsigned int normalsVBO = 0;
-	glGenBuffers(1, &normalsVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
+	/* unsigned int normalsVBO = 0; */
+	glGenBuffers(1, &o->normalVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, o->normalVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * normals.size(), normals.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 	
-	unsigned int rgbaVBO = 0;
-	glGenBuffers(1, &rgbaVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
+	/* unsigned int rgbaVBO = 0; */
+	glGenBuffers(1, &o->colorVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, o->colorVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rgba.size(), rgba.data(), GL_STATIC_DRAW);
 
+	/* unsigned int indexBuffer = 0; */
+	glGenBuffers(1, &o->indexVBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o->indexVBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * indices.size(), indices.data(), GL_STATIC_DRAW);
+
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, o->vao);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, o->normalVBO);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, rgbaVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, o->colorVBO);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	unsigned int indexBuffer = 0;
-	glGenBuffers(1, &indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * indices.size(), indices.data(), GL_STATIC_DRAW);
-	
+
 	printGLError();
 	
-	return vertexArray;
+	return o;
 }
