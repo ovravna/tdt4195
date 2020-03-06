@@ -13,6 +13,7 @@
 #include "OBJLoader.hpp"
 
 #include "stb_image.h"
+#include "toolbox.hpp"
 
 Camera * cam;
 int viewLocation;
@@ -61,9 +62,9 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	auto pos = node->position + node->referencePoint;
 
 	mat = glm::translate(mat, pos);
-	mat = glm::rotate(mat, glm::radians(node->rotation.x), glm::vec3(1, 0, 0)); 
-	mat = glm::rotate(mat, glm::radians(node->rotation.y), glm::vec3(0, 1, 0)); 
-	mat = glm::rotate(mat, glm::radians(node->rotation.z), glm::vec3(0, 0, 1)); 
+	mat = glm::rotate(mat, node->rotation.x, glm::vec3(1, 0, 0)); 
+	mat = glm::rotate(mat, node->rotation.y, glm::vec3(0, 1, 0)); 
+	mat = glm::rotate(mat, node->rotation.z, glm::vec3(0, 0, 1)); 
 	mat = glm::translate(mat, -pos);
 
 	/* node->currentTransformationMatrix *= mat; */
@@ -140,7 +141,7 @@ void runProgram(GLFWwindow* window)
 	auto rootNode = initSceneNode(nullptr);
 
 	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0), glm::vec3(0));
-	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 3, 0), glm::vec3(0.104737,-0.156937,2.063079));
+	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 5), glm::vec3(0.104737,-0.156937,2.063079));
 	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0), glm::vec3(0));
 	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); */
 	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0), glm::vec3(0.35, 2.3, 10.4));
@@ -173,14 +174,23 @@ void runProgram(GLFWwindow* window)
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		heliBodyNode->rotation = glm::vec3(a, -5*a, 0);
+
+		auto heading = simpleHeadingAnimation(0.1 * a);
+
+		heliBodyNode->position = glm::vec3(heading.x, 0, heading.z);
+		/* heliBodyNode->rotation = glm::vec3(0, a, 0); */
+		/* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); */
+		/* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); */
+
+		heliBodyNode->rotation = glm::vec3(heading.pitch, heading.yaw, heading.roll);
 		heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0);
 		heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0);
 
+		glad_glUniform1f(incrementorLocation, a);
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
         // Draw your scene here
-		/* std::cout << glm::to_string(heliBodyNode->position) << std::endl; */
+		std::cout << glm::to_string(heliBodyNode->rotation) << std::endl;
 
 		updateSceneNode(rootNode, glm::mat4(1));
 		drawSceneNode(rootNode, glm::mat4(1)); 

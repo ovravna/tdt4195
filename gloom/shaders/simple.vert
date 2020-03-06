@@ -9,6 +9,8 @@ out vec4 fragmentCol;
 out vec2 TexCoord;
 out vec3 fragmentNormal;
 
+uniform float incrementor;
+
 uniform mat4x4 view;
 uniform mat4x4 model;
 uniform mat4x4 projection;
@@ -18,7 +20,7 @@ void main()
 	gl_Position = projection * view * model * vec4(position, 1.0f); 
 
 	fragmentCol = col;
-	fragmentNormal = normal;
+	fragmentNormal = normal; // * vec3(cos(incrementor), 0, sin(incrementor));;
 
 	/* TexCoord = texCoord; */
 }
