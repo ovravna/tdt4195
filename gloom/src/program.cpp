@@ -56,7 +56,7 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	// Do transformation computations here
 	
 	
-	auto mat = glm::translate(transformationThusFar, node->position);
+	auto mat = transformationThusFar;
 
 	auto pos = node->position + node->referencePoint;
 
@@ -67,7 +67,7 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	mat = glm::translate(mat, -pos);
 
 	/* node->currentTransformationMatrix *= mat; */
-	node->currentTransformationMatrix = mat;
+	node->currentTransformationMatrix = glm::translate(mat, node->position);
 
 
 	
@@ -95,7 +95,7 @@ SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("None"), glm::vec
 		node->vertexArrayObjectID = -1;
 	else {
 		node->vertexArrayObjectID = setupVAO(mesh.vertices, mesh.indices, mesh.colours, mesh.normals); 
-		node->position = parent->position + position;
+		node->position = position;
 		/* node->position = glm::vec3(mesh.vertices[0], mesh.vertices[1], mesh.vertices[2]); */
 		node->VAOIndexCount = mesh.indices.size();
 		node->referencePoint = reference;
@@ -140,13 +140,12 @@ void runProgram(GLFWwindow* window)
 	auto rootNode = initSceneNode(nullptr);
 
 	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0), glm::vec3(0));
-	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 0), glm::vec3(0.104737,-0.156937,2.063079));
-	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0, 0, 0), glm::vec3(0.329862,2.378224,0.144255));
+	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 3, 0), glm::vec3(0.104737,-0.156937,2.063079));
+	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0), glm::vec3(0));
 	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); */
-	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.35, 2.3, 10.4));
-	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0, 0, 0), glm::vec3(1.226972,-0.197280,-1.033875));
+	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0), glm::vec3(0.35, 2.3, 10.4));
+	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0), glm::vec3(1.226972,-0.197280,-1.033875));
 
-	heliTailRotorNode->rotation = glm::vec3(45, 0, 0);
 
 
 
@@ -166,12 +165,17 @@ void runProgram(GLFWwindow* window)
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
 
+	float a = 0;
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
+		a += 0.1;
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		heliBodyNode->rotation = glm::vec3(a, -5*a, 0);
+		heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0);
+		heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0);
 
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
