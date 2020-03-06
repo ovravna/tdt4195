@@ -8,6 +8,8 @@ layout(location=3) in vec3 normal;
 out vec4 fragmentCol;
 out vec2 TexCoord;
 out vec3 fragmentNormal;
+out vec3 fragmentPos;
+
 
 uniform float incrementor;
 
@@ -20,7 +22,10 @@ void main()
 	gl_Position = projection * view * model * vec4(position, 1.0f); 
 
 	fragmentCol = col;
-	fragmentNormal = normalize(mat3(model) * normal); // * vec3(cos(incrementor), 0, sin(incrementor));;
+	/* fragmentNormal = normalize(mat3(model) * normal); */ 
+	fragmentNormal = mat3(transpose(inverse(model))) * normal;
+	/* fragmentNormal = normal; */
+	fragmentPos = vec3(model * vec4(position, 1.0));
 
 	/* TexCoord = texCoord; */
 }

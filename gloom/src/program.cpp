@@ -19,6 +19,7 @@ Camera * cam;
 int viewLocation;
 int modelLocation;
 int projectionLocation;
+glm::vec3 lightPos;
 
 float a = 0;
 float b = 0;
@@ -207,15 +208,17 @@ void runProgram(GLFWwindow* window)
 	
 	shader->activate();
 
-	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
+	auto myUniformLocation = glGetUniformLocation(shader->get(), "light_pos");
 	auto incrementorLocation = glGetUniformLocation(shader->get(), "incrementor");
+	auto viewPosLocation = glGetUniformLocation(shader->get(), "viewPos");
 
 	viewLocation = glGetUniformLocation(shader->get(), "view");
 	modelLocation = glGetUniformLocation(shader->get(), "model");
 	projectionLocation = glGetUniformLocation(shader->get(), "projection");
 	
 
-	glad_glUniform1f(myUniformLocation, 0);
+	/* glad_glUniform3f(myUniformLocation, 0); */
+	lightPos = glm::vec3(20, 20, 10);
 	glad_glUniform1f(incrementorLocation, 0);
 
     // Rendering Loop
@@ -235,18 +238,18 @@ void runProgram(GLFWwindow* window)
 		auto body = choppers[0].heli;
 
 		body->position = glm::vec3(0, 0, 5);
-		body->rotation = glm::vec3(0, 3.14, 0);
+		body->rotation = glm::vec3(0, 0.1*a, 0);
 
 		for (SceneNode * child: body->children) {
 
 			if (child->name == "Main_Rotor_main_rotor") 
-				child->rotation = glm::vec3(0, 2*a, 0);
+				child->rotation = glm::vec3(0, 1*a, 0);
 			if (child->name == "Tail_Rotor_tail_rotor") 
-				child->rotation = glm::vec3(0, -4*a, 0);
+				child->rotation = glm::vec3(-2*a, 0, 0);
 			if (child->name == "Door_door") {
 				if (doorMove) {
 					b += 0.1;
-					child->position = glm::vec3(0, 0, sinf(b) + 1);
+					child->position.z = sinf(b) + 1;
 				}
 
 				if (child->position.z >= 1.99) doorMove = false;
@@ -260,6 +263,8 @@ void runProgram(GLFWwindow* window)
 		/* heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0); */
 		/* heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0); */
 
+		glad_glUniform3f(myUniformLocation, lightPos.x, lightPos.y, lightPos.z);
+		glad_glUniform3f(viewPosLocation, cam->position.x, cam->position.y, cam->position.z);
 		glad_glUniform1f(incrementorLocation, a);
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
@@ -290,9 +295,16 @@ void handleKeyboardInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
-    {
 		doorMove = true;
-    }
+
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+		lightPos.y += 1;
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+		lightPos.y -= 1;
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+		lightPos.x -= 1;
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+		lightPos.x += 1;
 }
  
 unsigned int setupTexture(std::string texFile) {
