@@ -55,18 +55,31 @@ void drawSceneNode(SceneNode* root, glm::mat4 viewProjectionMatrix) {
 void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	// Do transformation computations here
 	
-	/* auto mat = node->currentTransformationMatrix; */
-	/* mat = glm::translate(mat, node->referencePoint); */
 	
+	auto mat = glm::translate(transformationThusFar, node->position);
 
-	node->currentTransformationMatrix = glm::translate(transformationThusFar, node->position);
+	auto pos = node->position + node->referencePoint;
+
+	mat = glm::translate(mat, pos);
+	mat = glm::rotate(mat, glm::radians(node->rotation.x), glm::vec3(1, 0, 0)); 
+	mat = glm::rotate(mat, glm::radians(node->rotation.y), glm::vec3(0, 1, 0)); 
+	mat = glm::rotate(mat, glm::radians(node->rotation.z), glm::vec3(0, 0, 1)); 
+	mat = glm::translate(mat, -pos);
+
+	/* node->currentTransformationMatrix *= mat; */
+	node->currentTransformationMatrix = mat;
+
+
+	
 	
 
 	
 	// Store matrix in the node's currentTransformationMatrix here
+	/* node->position = glm::vec3(0); */
+	/* node->rotation = glm::vec3(0); */
 	
 
-	auto combinedTransformation = transformationThusFar * node->currentTransformationMatrix;
+	auto combinedTransformation = node->currentTransformationMatrix;
 	
 	for(SceneNode* child : node->children) {
 		updateSceneNode(child, combinedTransformation);
@@ -82,14 +95,14 @@ SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("None"), glm::vec
 		node->vertexArrayObjectID = -1;
 	else {
 		node->vertexArrayObjectID = setupVAO(mesh.vertices, mesh.indices, mesh.colours, mesh.normals); 
-		node->position = position;
+		node->position = parent->position + position;
 		/* node->position = glm::vec3(mesh.vertices[0], mesh.vertices[1], mesh.vertices[2]); */
 		node->VAOIndexCount = mesh.indices.size();
 		node->referencePoint = reference;
 		node->rotation = glm::vec3(0, 0, 0);
 
 		glm::mat4x4 mat = glm::mat4x4(1);
-		mat = glm::translate(mat, node->position);
+		/* mat = glm::translate(mat, node->position); */
 
 		node->currentTransformationMatrix = mat;
 		addChild(parent, node);
@@ -127,10 +140,13 @@ void runProgram(GLFWwindow* window)
 	auto rootNode = initSceneNode(nullptr);
 
 	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0), glm::vec3(0));
-	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 5), glm::vec3(0.104737,-0.156937,2.063079));
+	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 0), glm::vec3(0.104737,-0.156937,2.063079));
 	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0, 0, 0), glm::vec3(0.329862,2.378224,0.144255));
-	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632));
+	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); */
+	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.35, 2.3, 10.4));
 	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0, 0, 0), glm::vec3(1.226972,-0.197280,-1.033875));
+
+	heliTailRotorNode->rotation = glm::vec3(45, 0, 0);
 
 
 
@@ -160,7 +176,7 @@ void runProgram(GLFWwindow* window)
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
         // Draw your scene here
-		/* std::cout << glm::to_string(cam->position) << std::endl; */
+		/* std::cout << glm::to_string(heliBodyNode->position) << std::endl; */
 
 		updateSceneNode(rootNode, glm::mat4(1));
 		drawSceneNode(rootNode, glm::mat4(1)); 
