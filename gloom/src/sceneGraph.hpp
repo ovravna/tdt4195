@@ -54,6 +54,7 @@ typedef struct SceneNode {
 	// The ID of the VAO containing the "appearance" of this SceneNode.
 	int vertexArrayObjectID;
 	unsigned int VAOIndexCount;
+	std::string name;
 } SceneNode;
 
 // Struct for keeping track of 2D coordinates

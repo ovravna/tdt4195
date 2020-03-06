@@ -20,9 +20,7 @@ int viewLocation;
 int modelLocation;
 int projectionLocation;
 
-struct VAO {
-	unsigned int vao, vertexVBO, indexVBO, colorVBO, normalVBO;
-};
+float a = 0;
 
 Gloom::Shader * loadShader(std::string frag, std::string vert) {
 	Gloom::Shader * shader = new Gloom::Shader(); 
@@ -82,6 +80,33 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	}
 }
 
+/* terrain */
+/* Body_body */
+/* Main_Rotor_main_rotor */
+/* Tail_Rotor_tail_rotor */
+/* Door_door */
+
+void animateChopper(SceneNode * body, Heading heading, glm::vec3 offset = glm::vec3(0)) {
+
+		body->position = glm::vec3(heading.x, 0, heading.z) + offset;
+		/* heliBodyNode->rotation = glm::vec3(0, 0.05 * a, 0); */
+		/* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); */
+		/* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); */
+
+		body->rotation = glm::vec3(heading.pitch, heading.yaw, heading.roll);
+		for (SceneNode * child: body->children) {
+
+			if (child->name == "Main_Rotor_main_rotor") 
+				child->rotation = glm::vec3(0, 2*a, 0);
+			if (child->name == "Tail_Rotor_tail_rotor") 
+				child->rotation = glm::vec3(0, -4*a, 0);
+		}
+		/* heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0); */
+		/* heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0); */
+
+
+
+}
 
 SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("None"), glm::vec3 position = glm::vec3(0), glm::vec3 reference = glm::vec3(0)) {
 
@@ -98,15 +123,32 @@ SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("None"), glm::vec
 		node->rotation = glm::vec3(0, 0, 0);
 
 		glm::mat4x4 mat = glm::mat4x4(1);
-		/* mat = glm::translate(mat, node->position); */
-
 		node->currentTransformationMatrix = mat;
+		node->name = mesh.name;
 		addChild(parent, node);
 	}
 
 	return node;
 	
 }
+
+SceneNode * initChopper(SceneNode * parent, Helicopter heli) {
+
+	auto heliBodyNode = initSceneNode(parent, heli.body, glm::vec3(0, 0, 0), glm::vec3(0.104737,-0.156937,2.063079));
+	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0), glm::vec3(0));
+	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); */
+	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0), glm::vec3(0.35, 2.3, 10.4));
+	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0), glm::vec3(1.226972,-0.197280,-1.033875));
+
+	return heliBodyNode;
+}
+
+struct Chopper {
+
+	SceneNode * heli;
+	glm::vec3 offset;
+
+};
 
 void runProgram(GLFWwindow* window)
 {
@@ -136,13 +178,24 @@ void runProgram(GLFWwindow* window)
 	auto rootNode = initSceneNode(nullptr);
 
 	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0), glm::vec3(0));
-	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 5), glm::vec3(0.104737,-0.156937,2.063079));
-	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0), glm::vec3(0));
-	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); */
-	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0), glm::vec3(0.35, 2.3, 10.4));
-	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0), glm::vec3(1.226972,-0.197280,-1.033875));
+
+	/* auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 0), glm::vec3(0.104737,-0.156937,2.063079)); */
+	/* auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0), glm::vec3(0)); */
+	/* /1* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632)); *1/ */
+	/* auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0), glm::vec3(0.35, 2.3, 10.4)); */
+	/* auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0), glm::vec3(1.226972,-0.197280,-1.033875)); */
 
 
+
+	std::vector<Chopper> choppers = {
+
+		{ initChopper(terrainNode, heli), glm::vec3(0, 0, 0) },
+		{ initChopper(terrainNode, heli), glm::vec3(0, 10, 0) },
+		{ initChopper(terrainNode, heli), glm::vec3(0, 20, 0) },
+		{ initChopper(terrainNode, heli), glm::vec3(0, 30, 0) },
+		{ initChopper(terrainNode, heli), glm::vec3(0, 40, 0) },
+
+	};
 
 
 	cam = new Camera(window);
@@ -161,7 +214,6 @@ void runProgram(GLFWwindow* window)
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
 
-	float a = 0;
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -170,16 +222,19 @@ void runProgram(GLFWwindow* window)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		auto heading = simpleHeadingAnimation(0.1 * a);
+		auto animation = simpleHeadingAnimation(0.1 * a);
 
-		heliBodyNode->position = glm::vec3(heading.x, 0, heading.z);
-		/* heliBodyNode->rotation = glm::vec3(0, 0.05 * a, 0); */
-		/* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); */
-		/* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); */
+		for (Chopper c: choppers)
+			animateChopper(c.heli, animation, c.offset);
 
-		heliBodyNode->rotation = glm::vec3(heading.pitch, heading.yaw, heading.roll);
-		heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0);
-		heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0);
+		/* heliBodyNode->position = glm::vec3(heading.x, 0, heading.z); */
+		/* /1* heliBodyNode->rotation = glm::vec3(0, 0.05 * a, 0); *1/ */
+		/* /1* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); *1/ */
+		/* /1* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); *1/ */
+
+		/* heliBodyNode->rotation = glm::vec3(heading.pitch, heading.yaw, heading.roll); */
+		/* heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0); */
+		/* heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0); */
 
 		glad_glUniform1f(incrementorLocation, a);
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
