@@ -70,11 +70,6 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	/* node->currentTransformationMatrix *= mat; */
 	node->currentTransformationMatrix = glm::translate(mat, node->position);
 
-
-	
-	
-
-	
 	// Store matrix in the node's currentTransformationMatrix here
 	/* node->position = glm::vec3(0); */
 	/* node->rotation = glm::vec3(0); */
@@ -178,19 +173,19 @@ void runProgram(GLFWwindow* window)
 		auto heading = simpleHeadingAnimation(0.1 * a);
 
 		heliBodyNode->position = glm::vec3(heading.x, 0, heading.z);
-		/* heliBodyNode->rotation = glm::vec3(0, a, 0); */
+		/* heliBodyNode->rotation = glm::vec3(0, 0.05 * a, 0); */
 		/* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); */
 		/* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); */
 
 		heliBodyNode->rotation = glm::vec3(heading.pitch, heading.yaw, heading.roll);
-		heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0);
-		heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0);
+		heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0);
+		heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0);
 
 		glad_glUniform1f(incrementorLocation, a);
 		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
         // Draw your scene here
-		std::cout << glm::to_string(heliBodyNode->rotation) << std::endl;
+		/* std::cout << glm::to_string(heliBodyNode->rotation) << std::endl; */
 
 		updateSceneNode(rootNode, glm::mat4(1));
 		drawSceneNode(rootNode, glm::mat4(1)); 

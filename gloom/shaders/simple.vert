@@ -20,7 +20,7 @@ void main()
 	gl_Position = projection * view * model * vec4(position, 1.0f); 
 
 	fragmentCol = col;
-	fragmentNormal = normal; // * vec3(cos(incrementor), 0, sin(incrementor));;
+	fragmentNormal = normalize(mat3(model) * normal); // * vec3(cos(incrementor), 0, sin(incrementor));;
 
 	/* TexCoord = texCoord; */
 }
