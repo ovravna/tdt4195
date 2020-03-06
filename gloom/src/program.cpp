@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "camera.hpp"
+#include "sceneGraph.hpp"
 #include "textures.h"
 #include "OBJLoader.hpp"
 
@@ -26,6 +27,46 @@ Gloom::Shader * loadShader(std::string frag, std::string vert) {
 
 unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned int> indices, std::vector<float> rgba, std::vector<float> normals);
 unsigned int setupTexture(std::string texFile);
+
+void drawSceneNode(SceneNode* root, glm::mat4 viewProjectionMatrix) {
+	// Draw here
+	
+	/* if (!root->children.empty()) { */
+	/* } */
+	if (root->vertexArrayObjectID != -1) {
+
+		glBindVertexArray(root->vertexArrayObjectID);
+		glDrawElements(GL_TRIANGLES, root->VAOIndexCount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
+	
+	for (SceneNode* child : root->children) {
+		drawSceneNode(child, viewProjectionMatrix);
+	}
+}
+
+/* SceneNode * initSceneNode() { */
+/* 	SceneNode * node = createSceneNode(); */
+/* 	node->vertexArrayObjectID = -1; */
+/* 	return node; */
+/* } */
+
+SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("none"), glm::vec3 position = glm::vec3(0, 0, 0)) {
+
+	SceneNode * node = createSceneNode();
+
+	if (parent == nullptr)
+		node->vertexArrayObjectID = -1;
+	else {
+		node->vertexArrayObjectID = setupVAO(mesh.vertices, mesh.indices, mesh.colours, mesh.normals); 
+		node->position = position;
+		node->VAOIndexCount = mesh.indices.size();
+		addChild(parent, node);
+	}
+
+	return node;
+	
+}
 
 void runProgram(GLFWwindow* window)
 {
@@ -52,13 +93,30 @@ void runProgram(GLFWwindow* window)
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
 	Helicopter heli = loadHelicopterModel("gloom/resources/helicopter.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
-	auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals);
-	auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals);
-	auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals);
-	auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals);
-	auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals);
+	
+	/* auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
+	/* auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals); */
+	/* auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals); */
+	/* auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals); */
+	/* auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals); */
 	/* unsigned int texture = setupTexture("container.jpg"); */
 
+	/* auto terrainNode = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
+	/* auto heliBodyNode = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals); */
+	/* auto heliMainRotorNode = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals); */
+	/* auto heliTailRotorNode = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals); */
+	/* auto heliDoorNode = initSceneNode(heli.door, glm::vec3(-5, 20, 0), ); */
+
+	auto rootNode = initSceneNode(nullptr);
+	/* rootNode->vertexArrayObjectID = -1; */
+	/* rootNode->position = glm::vec3(0, 0, 0); */
+
+
+	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0, 0, 0));
+	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 20, 0));
+	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(3, 20, 0));
+	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(-3, 20, 0));
+	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(-5, 20, 0));
 
 
 
@@ -89,26 +147,8 @@ void runProgram(GLFWwindow* window)
 		glad_glUniformMatrix4fv(viewLocation, 1, GL_FALSE, cam->getView());
 
         // Draw your scene here
-		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
-		/* glBindTexture(GL_TEXTURE_2D, texture); */
 
-		glBindVertexArray(vertexArray);
-		glDrawElements(GL_TRIANGLES, lunar.indices.size(), GL_UNSIGNED_INT, 0);
-
-		/* activateVAO(*bodyHeliVAO); */
-		glBindVertexArray(bodyHeliVAO);
-		glDrawElements(GL_TRIANGLES, heli.body.indices.size(), GL_UNSIGNED_INT, 0);
-
-		glBindVertexArray(mainRotorVAO);
-		glDrawElements(GL_TRIANGLES, heli.mainRotor.indices.size(), GL_UNSIGNED_INT, 0);
-
-		glBindVertexArray(tailRotorVAO);
-		glDrawElements(GL_TRIANGLES, heli.tailRotor.indices.size(), GL_UNSIGNED_INT, 0);
-
-		glBindVertexArray(doorVAO);
-		glDrawElements(GL_TRIANGLES, heli.door.indices.size(), GL_UNSIGNED_INT, 0);
-
-		/* glDrawArrays(GL_TRIANGLES, 0, 36); */
+		drawSceneNode(rootNode, glm::mat4(1)); 
 
         // Handle other events
         glfwPollEvents();
