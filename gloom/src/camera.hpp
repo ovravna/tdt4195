@@ -35,12 +35,12 @@ class Camera {
           glm::vec3 right;
 
           glm::vec3 front;
-          glm::vec3 position;
 
           int windowHeight, windowWidth;
           GLFWwindow *window;
 
 	public:
+        glm::vec3 position;
 		Camera(GLFWwindow* window) {
 			this->window = window;
 
@@ -74,7 +74,7 @@ class Camera {
 		};
 
 		float * getView() { return glm::value_ptr(view); };
-		float * getModel() { return glm::value_ptr(model); };
+		glm::mat4x4 getModel() { return model; };
 		float * getProjection() { return glm::value_ptr(projection); };
 
 		void tick() {
@@ -121,7 +121,6 @@ class Camera {
 		}
 		void handleKeyboardInput()
 		{
-			tick();
 
 			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 			{
@@ -174,6 +173,7 @@ class Camera {
 			/* 	view = mat; */
 			/* } */
 
+			tick();
 		}
 		
 };

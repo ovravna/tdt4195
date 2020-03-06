@@ -14,6 +14,11 @@
 
 #include "stb_image.h"
 
+Camera * cam;
+int viewLocation;
+int modelLocation;
+int projectionLocation;
+
 struct VAO {
 	unsigned int vao, vertexVBO, indexVBO, colorVBO, normalVBO;
 };
@@ -29,12 +34,13 @@ unsigned int setupVAO(std::vector<float> vertexCoordinates, std::vector<unsigned
 unsigned int setupTexture(std::string texFile);
 
 void drawSceneNode(SceneNode* root, glm::mat4 viewProjectionMatrix) {
-	// Draw here
-	
-	/* if (!root->children.empty()) { */
-	/* } */
-	if (root->vertexArrayObjectID != -1) {
 
+	auto model = root->currentTransformationMatrix;
+	glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	glad_glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, cam->getProjection());
+	glad_glUniformMatrix4fv(viewLocation, 1, GL_FALSE, cam->getView());
+
+	if (root->vertexArrayObjectID != -1) {
 		glBindVertexArray(root->vertexArrayObjectID);
 		glDrawElements(GL_TRIANGLES, root->VAOIndexCount, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
@@ -45,13 +51,30 @@ void drawSceneNode(SceneNode* root, glm::mat4 viewProjectionMatrix) {
 	}
 }
 
-/* SceneNode * initSceneNode() { */
-/* 	SceneNode * node = createSceneNode(); */
-/* 	node->vertexArrayObjectID = -1; */
-/* 	return node; */
-/* } */
 
-SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("none"), glm::vec3 position = glm::vec3(0, 0, 0)) {
+void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
+	// Do transformation computations here
+	
+	/* auto mat = node->currentTransformationMatrix; */
+	/* mat = glm::translate(mat, node->referencePoint); */
+	
+
+	node->currentTransformationMatrix = glm::translate(transformationThusFar, node->position);
+	
+
+	
+	// Store matrix in the node's currentTransformationMatrix here
+	
+
+	auto combinedTransformation = transformationThusFar * node->currentTransformationMatrix;
+	
+	for(SceneNode* child : node->children) {
+		updateSceneNode(child, combinedTransformation);
+	}
+}
+
+
+SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("None"), glm::vec3 position = glm::vec3(0), glm::vec3 reference = glm::vec3(0)) {
 
 	SceneNode * node = createSceneNode();
 
@@ -60,7 +83,15 @@ SceneNode * initSceneNode(SceneNode * parent, Mesh mesh = Mesh("none"), glm::vec
 	else {
 		node->vertexArrayObjectID = setupVAO(mesh.vertices, mesh.indices, mesh.colours, mesh.normals); 
 		node->position = position;
+		/* node->position = glm::vec3(mesh.vertices[0], mesh.vertices[1], mesh.vertices[2]); */
 		node->VAOIndexCount = mesh.indices.size();
+		node->referencePoint = reference;
+		node->rotation = glm::vec3(0, 0, 0);
+
+		glm::mat4x4 mat = glm::mat4x4(1);
+		mat = glm::translate(mat, node->position);
+
+		node->currentTransformationMatrix = mat;
 		addChild(parent, node);
 	}
 
@@ -75,8 +106,8 @@ void runProgram(GLFWwindow* window)
     glDepthFunc(GL_LESS);
 
     // Configure miscellaneous OpenGL settings
-    /* glEnable(GL_CULL_FACE); */
-	glDisable(GL_CULL_FACE); 
+    glEnable(GL_CULL_FACE);
+	/* glDisable(GL_CULL_FACE); */ 
 	/* glFrontFace(GL_CW); */
 
 	/* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */  
@@ -88,39 +119,22 @@ void runProgram(GLFWwindow* window)
     glClearColor(0.2, 0.2, 0.2, 1);
 
     // Set up your scene here (create Vertex Array Objects, etc.)
-	/* unsigned int vertexArray = setupVAO(triangle_vertices, triangle_indices); */
 	
 	Mesh lunar = loadTerrainMesh("gloom/resources/lunarsurface.obj");
 	Helicopter heli = loadHelicopterModel("gloom/resources/helicopter.obj");
 	auto shader = loadShader("gloom/shaders/simple.frag", "gloom/shaders/simple.vert");
 	
-	/* auto vertexArray = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
-	/* auto bodyHeliVAO = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals); */
-	/* auto mainRotorVAO = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals); */
-	/* auto tailRotorVAO = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals); */
-	/* auto doorVAO = setupVAO(heli.door.vertices, heli.door.indices, heli.door.colours, heli.door.normals); */
-	/* unsigned int texture = setupTexture("container.jpg"); */
-
-	/* auto terrainNode = setupVAO(lunar.vertices, lunar.indices, lunar.colours, lunar.normals); */
-	/* auto heliBodyNode = setupVAO(heli.body.vertices, heli.body.indices, heli.body.colours, heli.body.normals); */
-	/* auto heliMainRotorNode = setupVAO(heli.mainRotor.vertices, heli.mainRotor.indices, heli.mainRotor.colours, heli.mainRotor.normals); */
-	/* auto heliTailRotorNode = setupVAO(heli.tailRotor.vertices, heli.tailRotor.indices, heli.tailRotor.colours, heli.tailRotor.normals); */
-	/* auto heliDoorNode = initSceneNode(heli.door, glm::vec3(-5, 20, 0), ); */
-
 	auto rootNode = initSceneNode(nullptr);
-	/* rootNode->vertexArrayObjectID = -1; */
-	/* rootNode->position = glm::vec3(0, 0, 0); */
 
-
-	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0, 0, 0));
-	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 20, 0));
-	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(3, 20, 0));
-	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(-3, 20, 0));
-	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(-5, 20, 0));
+	auto terrainNode = initSceneNode(rootNode, lunar, glm::vec3(0), glm::vec3(0));
+	auto heliBodyNode = initSceneNode(terrainNode, heli.body, glm::vec3(0, 0, 5), glm::vec3(0.104737,-0.156937,2.063079));
+	auto heliMainRotorNode = initSceneNode(heliBodyNode, heli.mainRotor, glm::vec3(0, 0, 0), glm::vec3(0.329862,2.378224,0.144255));
+	auto heliTailRotorNode = initSceneNode(heliBodyNode, heli.tailRotor, glm::vec3(0, 0, 0), glm::vec3(0.323498,2.550585,10.231632));
+	auto heliDoorNode = initSceneNode(heliBodyNode, heli.door, glm::vec3(0, 0, 0), glm::vec3(1.226972,-0.197280,-1.033875));
 
 
 
-	auto cam = new Camera(window);
+	cam = new Camera(window);
 	/* glfwSetCursorPosCallback(window, ); */  
 	
 	shader->activate();
@@ -128,9 +142,10 @@ void runProgram(GLFWwindow* window)
 	auto myUniformLocation = glGetUniformLocation(shader->get(), "osilator");
 	auto incrementorLocation = glGetUniformLocation(shader->get(), "incrementor");
 
-	auto viewLocation = glGetUniformLocation(shader->get(), "view");
-	auto modelLocation = glGetUniformLocation(shader->get(), "model");
-	auto projectionLocation = glGetUniformLocation(shader->get(), "projection");
+	viewLocation = glGetUniformLocation(shader->get(), "view");
+	modelLocation = glGetUniformLocation(shader->get(), "model");
+	projectionLocation = glGetUniformLocation(shader->get(), "projection");
+	
 
 	glad_glUniform1f(myUniformLocation, 0);
 	glad_glUniform1f(incrementorLocation, 0);
@@ -142,12 +157,12 @@ void runProgram(GLFWwindow* window)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel());
-		glad_glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, cam->getProjection());
-		glad_glUniformMatrix4fv(viewLocation, 1, GL_FALSE, cam->getView());
+		/* glad_glUniformMatrix4fv(modelLocation, 1, GL_FALSE, cam->getModel()); */
 
         // Draw your scene here
+		/* std::cout << glm::to_string(cam->position) << std::endl; */
 
+		updateSceneNode(rootNode, glm::mat4(1));
 		drawSceneNode(rootNode, glm::mat4(1)); 
 
         // Handle other events
