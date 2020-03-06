@@ -21,6 +21,8 @@ int modelLocation;
 int projectionLocation;
 
 float a = 0;
+float b = 0;
+bool doorMove = false;
 
 Gloom::Shader * loadShader(std::string frag, std::string vert) {
 	Gloom::Shader * shader = new Gloom::Shader(); 
@@ -100,6 +102,8 @@ void animateChopper(SceneNode * body, Heading heading, glm::vec3 offset = glm::v
 				child->rotation = glm::vec3(0, 2*a, 0);
 			if (child->name == "Tail_Rotor_tail_rotor") 
 				child->rotation = glm::vec3(0, -4*a, 0);
+			if (child->name == "Door_door") 
+				child->position = glm::vec3(0, 0, 100*a);
 		}
 		/* heliTailRotorNode->rotation = glm::vec3(-4*a, 0, 0); */
 		/* heliMainRotorNode->rotation = glm::vec3(0, 2*a, 0); */
@@ -190,10 +194,10 @@ void runProgram(GLFWwindow* window)
 	std::vector<Chopper> choppers = {
 
 		{ initChopper(terrainNode, heli), glm::vec3(0, 0, 0) },
-		{ initChopper(terrainNode, heli), glm::vec3(0, 10, 0) },
-		{ initChopper(terrainNode, heli), glm::vec3(0, 20, 0) },
-		{ initChopper(terrainNode, heli), glm::vec3(0, 30, 0) },
-		{ initChopper(terrainNode, heli), glm::vec3(0, 40, 0) },
+		/* { initChopper(terrainNode, heli), glm::vec3(0, 10, 0) }, */
+		/* { initChopper(terrainNode, heli), glm::vec3(0, 20, 0) }, */
+		/* { initChopper(terrainNode, heli), glm::vec3(0, 30, 0) }, */
+		/* { initChopper(terrainNode, heli), glm::vec3(0, 40, 0) }, */
 
 	};
 
@@ -218,17 +222,37 @@ void runProgram(GLFWwindow* window)
     while (!glfwWindowShouldClose(window))
     {
 		a += 0.1;
+		
         // Clear colour and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 		auto animation = simpleHeadingAnimation(0.1 * a);
 
-		for (Chopper c: choppers)
-			animateChopper(c.heli, animation, c.offset);
+		/* for (Chopper c: choppers) */
+		/* 	animateChopper(c.heli, animation, c.offset); */
 
-		/* heliBodyNode->position = glm::vec3(heading.x, 0, heading.z); */
-		/* /1* heliBodyNode->rotation = glm::vec3(0, 0.05 * a, 0); *1/ */
+		auto body = choppers[0].heli;
+
+		body->position = glm::vec3(0, 0, 5);
+		body->rotation = glm::vec3(0, 3.14, 0);
+
+		for (SceneNode * child: body->children) {
+
+			if (child->name == "Main_Rotor_main_rotor") 
+				child->rotation = glm::vec3(0, 2*a, 0);
+			if (child->name == "Tail_Rotor_tail_rotor") 
+				child->rotation = glm::vec3(0, -4*a, 0);
+			if (child->name == "Door_door") {
+				if (doorMove) {
+					b += 0.1;
+					child->position = glm::vec3(0, 0, sinf(b) + 1);
+				}
+
+				if (child->position.z >= 1.99) doorMove = false;
+				if (child->position.z <= 0.01) doorMove = false;
+			}
+		}
 		/* /1* heliTailRotorNode->rotation = glm::vec3(-10*a, 0, 0); *1/ */
 		/* /1* heliMainRotorNode->rotation = glm::vec3(0, 20*a, 0); *1/ */
 
@@ -265,6 +289,10 @@ void handleKeyboardInput(GLFWwindow* window)
     {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+    {
+		doorMove = true;
+    }
 }
  
 unsigned int setupTexture(std::string texFile) {
@@ -280,7 +308,6 @@ unsigned int setupTexture(std::string texFile) {
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load(texFile.c_str(), &width, &height, &nrChannels, 0);
 	
-	/* unsigned char * data = (unsigned char*) dog; */
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
