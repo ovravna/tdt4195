@@ -19,10 +19,10 @@ float ambientStrength = 0.1;
 vec3 ambientColor = vec3(1, 1, 1);
 vec3 ambient = ambientColor * ambientStrength;
 
-vec3 diffuseColor = vec3(1, 0.7, 0.7);
+vec3 diffuseColor = vec3(1, 1, 1);
 
 float specularStrength = 0.7;
-vec3 specularColor = vec3(0.5, 0.5, 1);
+vec3 specularColor = vec3(1, 1, 1);
 
 void main()
 {
@@ -31,16 +31,16 @@ void main()
 	//diffuse 
 	vec3 lightDir = normalize(light_pos - fragmentPos);
 	vec3 norm = normalize(fragmentNormal);
-	float diff = max(dot(norm, lightDir), 0.0);
+	float diff = clamp(dot(norm, lightDir), 0.0, 1.0);
 	vec3 diffuse = diff * diffuseColor;
 
 	//specular
 	vec3 viewDir = normalize(viewPos - fragmentPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 1024);
 	vec3 specular = specularStrength * spec * specularColor;
 
-	c = (ambient + diffuse + specular) * fragmentCol.xyz;
+	c = (ambient + diffuse + specular) * fragmentCol.rgb;
 	/* c *= diffuse; */
 	/* c *= ambient;  // ambient lighting */
 	/* c *= max(0, dot(fragmentNormal, -lightDirection)); */ 

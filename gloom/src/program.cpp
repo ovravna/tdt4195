@@ -58,23 +58,17 @@ void updateSceneNode(SceneNode* node, glm::mat4 transformationThusFar) {
 	// Do transformation computations here
 	
 	
-	auto mat = transformationThusFar;
+/* transformationThusFar; */
+	/* auto pos = node->position + node->referencePoint; */
+	glm::mat4x4 mat = 
+	   glm::translate(node->position)
+	 * glm::translate(node->referencePoint)
+	 * glm::rotate(node->rotation.x, glm::vec3(1, 0, 0))
+	 * glm::rotate(node->rotation.y, glm::vec3(0, 1, 0)) 
+	 * glm::rotate(node->rotation.z, glm::vec3(0, 0, 1)) 
+	 * glm::translate(-node->referencePoint); 
 
-	auto pos = node->position + node->referencePoint;
-
-	mat = glm::translate(mat, pos);
-	mat = glm::rotate(mat, node->rotation.x, glm::vec3(1, 0, 0)); 
-	mat = glm::rotate(mat, node->rotation.y, glm::vec3(0, 1, 0)); 
-	mat = glm::rotate(mat, node->rotation.z, glm::vec3(0, 0, 1)); 
-	mat = glm::translate(mat, -pos);
-
-	/* node->currentTransformationMatrix *= mat; */
-	node->currentTransformationMatrix = glm::translate(mat, node->position);
-
-	// Store matrix in the node's currentTransformationMatrix here
-	/* node->position = glm::vec3(0); */
-	/* node->rotation = glm::vec3(0); */
-	
+	node->currentTransformationMatrix = transformationThusFar * mat;
 
 	auto combinedTransformation = node->currentTransformationMatrix;
 	
